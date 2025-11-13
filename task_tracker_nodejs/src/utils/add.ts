@@ -1,5 +1,6 @@
 import * as fs from "fs";
-const path = "storage.json";
+
+export const path = "storage.json";
 
 const add = (description: string) => {
 	// A schema for the tasks
@@ -7,8 +8,8 @@ const add = (description: string) => {
 		id: number;
 		description: string;
 		status: string;
-		created_at: number;
-		updated_at: number;
+		created_at: string;
+		updated_at: string;
 	};
 
 	// Check if the file exists
@@ -17,8 +18,8 @@ const add = (description: string) => {
 			id: 0,
 			description: description,
 			status: "todo",
-			created_at: Date.now(),
-			updated_at: Date.now(),
+			created_at: new Date().toISOString(),
+			updated_at: new Date().toISOString(),
 		};
 
 		// If the file does not exist, create a new list of todos add the current todo then save it to the file
