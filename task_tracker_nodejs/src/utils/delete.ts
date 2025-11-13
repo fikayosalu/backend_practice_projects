@@ -9,22 +9,17 @@ type task = {
 	updated_at: string;
 };
 
-const delete_task = (id: number) => {
+const delete_task = (id: number): string => {
 	try {
-		fs.readFile(path, "utf-8", (err, data) => {
-			if (err) {
-				throw new Error("Create a task first, the is currently no task");
-			} else {
-				const list = JSON.parse(data);
-				const new_list = list.filter((obj: task) => {
-					return obj.id !== id;
-				});
-				fs.writeFile(path, `${JSON.stringify(new_list)}`, (err) => {});
-			}
-		});
+		const data = fs.readFileSync(path, "utf-8");
+		let list = JSON.parse(data);
+		const count = list.length;
+		list = list.filter((obj: task) => obj.id !== id);
+		fs.writeFileSync(path, JSON.stringify(list));
+		if (list.length < count) return "Deleted task successfully";
+		return "Task not found";
 	} catch (error) {
-		const e = error as Error;
-		console.log(e.message);
+		return "Add a task please";
 	}
 };
 
