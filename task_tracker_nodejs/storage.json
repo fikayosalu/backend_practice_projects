@@ -1,1 +1,1 @@
-[{"id":1,"description":"eat","status":"todo","created_at":"2025-11-13T22:37:26.270Z","updated_at":"2025-11-13T22:37:26.272Z"},{"id":2,"description":"Read Quants","status":"todo","created_at":"2025-11-13T22:37:44.456Z","updated_at":"2025-11-13T22:37:44.457Z"}]
+[{"id":2,"description":"Read for Quants","status":"in-progress","created_at":"2025-11-16T16:05:36.183Z","updated_at":"2025-11-16T16:05:36.185Z"},{"id":3,"description":"Finish todo task","status":"done","created_at":"2025-11-16T16:06:16.622Z","updated_at":"2025-11-16T16:06:16.623Z"}]

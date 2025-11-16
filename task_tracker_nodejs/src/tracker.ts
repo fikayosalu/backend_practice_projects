@@ -3,6 +3,7 @@ import add from "./utils/add";
 import update from "./utils/update";
 import delete_task from "./utils/delete";
 import changeStatus from "./utils/status";
+import listTasks from "./utils/list";
 
 // Set up read line to get user inputs
 const rl = readline.createInterface({
@@ -114,6 +115,17 @@ function askUser() {
 				progress("done", inputCommand);
 				break;
 
+			case "list":
+				if (inputCommand.length === 2) {
+					const output = listTasks(inputCommand[1]);
+					console.log(output);
+				} else if (inputCommand.length === 1) {
+					const output = listTasks();
+					console.log(output);
+				} else {
+					console.log("list expects at most 1 argument or null");
+				}
+				break;
 			default:
 				console.log(`${input}: '${input}' is not a command`);
 				break;

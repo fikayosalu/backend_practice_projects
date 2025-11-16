@@ -23,8 +23,13 @@ const add = (description: string): string => {
 	try {
 		fs.accessSync(path);
 		const data = JSON.parse(fs.readFileSync(path, "utf-8"));
-		todo.id = data.length + 1;
-		data.push(todo);
+		if (data.length >= 1) {
+			todo.id = data[data.length - 1].id + 1;
+			data.push(todo);
+		} else {
+			todo.id = data.length + 1;
+			data.push(todo);
+		}
 		fs.writeFileSync(path, JSON.stringify(data));
 		return "Task added successfully";
 	} catch (error) {
