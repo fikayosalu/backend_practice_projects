@@ -1,24 +1,27 @@
+/* 
+This module contains a function that lists the tasks
+according to its status
+*/
 import * as fs from "fs";
-import { path } from "./add";
-
-type task = {
-	id: number;
-	description: string;
-	status: string;
-	created_at: string;
-	updated_at: string;
-};
+import { path, task } from "./add";
 
 const taskStatus = ["todo", "in-progress", "done"];
 
 const listTasks = (status: string | null = null): string | task[] => {
+	// Check if file exists
 	try {
 		const data = JSON.parse(fs.readFileSync(path, "utf-8"));
+		// If file exists, check if its empty
 		if (data) {
+			// If status argument is not specified return all tasks
 			if (status === null) return data;
+
 			for (let item of taskStatus) {
+				// If status argument is specified check if its in the taskStatus array
 				if (item === status) {
+					// If the status matches that in the array, list the task with that status
 					const list = data.filter((obj: task) => obj.status === status);
+					// If there is no match return not found message
 					if (list.length !== 0) return list;
 					return `There is no task with status ${item}`;
 				}

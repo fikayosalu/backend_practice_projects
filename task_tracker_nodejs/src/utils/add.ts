@@ -1,17 +1,20 @@
+/*
+This module contains a function that adds tasks
+created by the user
+ */
 import * as fs from "fs";
 
 export const path = "storage.json";
 
+export type task = {
+	id: number;
+	description: string;
+	status: string;
+	created_at: string;
+	updated_at: string;
+};
 const add = (description: string): string => {
 	// A schema for the tasks
-	type task = {
-		id: number;
-		description: string;
-		status: string;
-		created_at: string;
-		updated_at: string;
-	};
-
 	const todo: task = {
 		id: 0,
 		description: description,

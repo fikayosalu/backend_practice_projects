@@ -1,3 +1,8 @@
+/*
+This module contains the entrance of the project,
+It contains the function that reads user input
+ */
+
 import * as readline from "readline";
 import add from "./utils/add";
 import update from "./utils/update";

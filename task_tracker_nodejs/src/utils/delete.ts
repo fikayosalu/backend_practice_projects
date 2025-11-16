@@ -1,13 +1,10 @@
-import { path } from "./add";
-import * as fs from "fs";
+/*
+This module contains a function that deletes
+a task based on the id that the user specified
+ */
 
-type task = {
-	id: number;
-	description: string;
-	status: string;
-	created_at: string;
-	updated_at: string;
-};
+import { path, task } from "./add";
+import * as fs from "fs";
 
 const delete_task = (id: number): string => {
 	try {

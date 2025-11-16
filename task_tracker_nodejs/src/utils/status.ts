@@ -1,23 +1,28 @@
-import { path } from "./add";
+/*
+This module contains a function that changes the status 
+of a task
+ */
+import { path, task } from "./add";
 import * as fs from "fs";
 
-type task = {
-	id: number;
-	description: string;
-	status: string;
-	created_at: string;
-	updated_at: string;
-};
-
 const changeStatus = (status: string, id: number): string => {
+	// Check if the storage file exists
 	try {
+		// Retrieve contents of file if it exists
 		const data = JSON.parse(fs.readFileSync(path, "utf-8"));
+
+		// Retrieve index of the specified task using id argument
 		const index = data.findIndex((obj: task) => obj.id === id);
+
+		// If task is not found
 		if (index === -1) return "Task not found";
+
+		// If task is found, update the status with the specified status argument
 		data[index].status = status;
 		fs.writeFileSync(path, JSON.stringify(data));
 		return "Status changed successfully";
 	} catch (error) {
+		// If file does not exist, tell the user to add a task
 		return "Add a task";
 	}
 };
