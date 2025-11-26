@@ -85,8 +85,28 @@ const getDogPic = async () => {
 
 		console.log("I just wrote to the file");
 	} catch (err) {
-		console.log(err);
+		// console.log(err);
+		throw err;
 	}
+	return "2: READY 🐶";
 };
 
-getDogPic();
+console.log("1: Will get dog pics!");
+
+(async () => {
+	try {
+		const x = await getDogPic();
+		console.log(x);
+	} catch (err) {
+		console.log(err);
+	}
+})();
+console.log("3: Done getting dog pics");
+
+// getDogPic()
+// 	.then((x) => {
+// 		console.log(x);
+// 	})
+// 	.catch((err) => {
+// 		console.log("Error 🌋");
+// 	});
