@@ -1,5 +1,5 @@
 import express from "express";
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import * as fs from "fs";
 
 const app = express();
@@ -22,30 +22,25 @@ type tourFrame = {
 
 app.use(express.json());
 
+app.use((req: Request, res: Response, next: NextFunction) => {
+	console.log("Hello from the middleware");
+	next();
+});
+
 const tours: tourFrame[] = JSON.parse(
 	fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, "utf-8")
 );
 
-// app.get("/", (req: Request, res: Response) => {
-// 	res
-// 		.status(200)
-// 		.json({ message: "Hello from the server side!", app: "Natours" });
-// });
-
-// app.post("/", (req: Request, res: Response) => {
-// 	res.send("You can post this endpoint...");
-// });
-
-app.get("/api/v1/tours", (req: Request, res: Response) => {
+const getAllTours = (req: Request, res: Response) => {
 	res.status(200).json({
 		status: "success",
 		data: {
 			tours,
 		},
 	});
-});
+};
 
-app.get("/api/v1/tours/:id", (req: Request, res: Response) => {
+const getARoute = (req: Request, res: Response) => {
 	console.log(req.params);
 	const id = Number(req.params.id);
 	console.log(id);
@@ -66,9 +61,9 @@ app.get("/api/v1/tours/:id", (req: Request, res: Response) => {
 			message: "Invalid ID",
 		});
 	}
-});
+};
 
-app.post("/api/v1/tours", (req: Request, res: Response) => {
+const createATour = (req: Request, res: Response) => {
 	// console.log(req.body);
 	const newId = tours[tours.length - 1]!.id + 1;
 	const newTour = { id: newId, ...req.body };
@@ -85,8 +80,9 @@ app.post("/api/v1/tours", (req: Request, res: Response) => {
 			});
 		}
 	);
-});
-app.patch("/api/v1/tours/:id", (req: Request, res: Response) => {
+};
+
+const updateARoute = (req: Request, res: Response) => {
 	const id = Number(req.params.id);
 	if (id > tours.length) {
 		return res.status(404).json({
@@ -100,9 +96,9 @@ app.patch("/api/v1/tours/:id", (req: Request, res: Response) => {
 			tour: "<Updated tour here>",
 		},
 	});
-});
+};
 
-app.delete("/api/v1/tours/:id", (req: Request, res: Response) => {
+const deleteARoute = (req: Request, res: Response) => {
 	const id = Number(req.params.id);
 	if (id > tours.length) {
 		return res.status(404).json({
@@ -116,7 +112,15 @@ app.delete("/api/v1/tours/:id", (req: Request, res: Response) => {
 			tour: null,
 		},
 	});
-});
+};
+
+app.route("/api/v1/tours").get(getAllTours).post(createATour);
+
+app
+	.route("/api/v1/tours/:id")
+	.get(getARoute)
+	.patch(updateARoute)
+	.delete(deleteARoute);
 
 app.listen(PORT, () => {
 	console.log(`This app is listening on http://localhost:${PORT}`);
