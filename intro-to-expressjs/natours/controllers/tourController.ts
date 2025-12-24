@@ -32,36 +32,40 @@ type tourFrame = {
 //   return;
 // };
 
-export const getAllTours = (req: Request, res: Response) => {
-  // res.status(200).json({
-  //   status: "success",
-  //   data: {
-  //     tours,
-  //   },
-  // });
+export const getAllTours = async (req: Request, res: Response) => {
+  try {
+    const tours = await Tour.find();
+
+    res.status(200).json({
+      status: "success",
+      results: tours.length,
+      data: {
+        tours,
+      },
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "fail",
+      message: error,
+    });
+  }
 };
 
-export const getARoute = (req: Request, res: Response) => {
-  console.log(req.params);
-  const id = Number(req.params.id);
-  console.log(id);
+export const getTour = async (req: Request, res: Response) => {
+  try {
+    const tour = await Tour.findById(req.params.id);
+    // Tour.findOne({ _id: req.params.id })
 
-  // const tour = tours.find((obj) => {
-  //   return obj.id === id;
-  // });
-  // if (tour) {
-  //   res.status(200).json({
-  //     status: "success",
-  //     data: {
-  //       tour,
-  //     },
-  //   });
-  // } else {
-  //   res.status(404).json({
-  //     status: "failed",
-  //     message: "Invalid ID",
-  //   });
-  // }
+    res.status(200).json({
+      status: "success",
+      data: tour,
+    });
+  } catch (error) {
+    res.status(404).json({
+      status: "fail",
+      message: error,
+    });
+  }
 };
 
 export const createATour = async (req: Request, res: Response) => {
