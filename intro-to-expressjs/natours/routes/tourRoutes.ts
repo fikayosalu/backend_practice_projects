@@ -1,16 +1,18 @@
 import express, { NextFunction, Response, Request } from "express";
 import * as tourController from "../controllers/tourController";
-export const router = express.Router();
+const tourRouter = express.Router();
 
-router.param("id", tourController.checkId);
+// tourRouter.param("id", tourController.checkId);
 
-router
-	.route("/")
-	.get(tourController.getAllTours)
-	.post(tourController.checkBody, tourController.createATour);
+tourRouter
+  .route("/")
+  .get(tourController.getAllTours)
+  .post(tourController.createATour);
 
-router
-	.route("/:id")
-	.get(tourController.getARoute)
-	.patch(tourController.updateARoute)
-	.delete(tourController.deleteARoute);
+tourRouter
+  .route("/:id")
+  .get(tourController.getARoute)
+  .patch(tourController.updateARoute)
+  .delete(tourController.deleteARoute);
+
+export default tourRouter;

@@ -1,7 +1,7 @@
 import express from "express";
 import { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
-import { router as tourRouter } from "./routes/tourRoutes";
+import tourRouter from "./routes/tourRoutes";
 import { router as userRouter } from "./routes/userRoutes";
 
 const app = express();
@@ -9,8 +9,8 @@ const app = express();
 app.use(express.json());
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-	console.log("Hello from the middleware");
-	next();
+  console.log("Hello from the middleware");
+  next();
 });
 app.use(morgan("combined"));
 
