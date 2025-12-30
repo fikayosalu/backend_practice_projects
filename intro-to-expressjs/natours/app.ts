@@ -7,6 +7,7 @@ import { router as userRouter } from "./routes/userRoutes";
 const app = express();
 
 app.use(express.json());
+app.set("query parser", "extended");
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log("Hello from the middleware");
