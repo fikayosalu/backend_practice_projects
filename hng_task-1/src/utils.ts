@@ -47,5 +47,3 @@ export const uniqueCharacter = (str: string) => {
 	const uniqueChars = new Set(str);
 	return uniqueChars.size;
 };
-
-console.log(uniqueCharacter("string to analyze"));
