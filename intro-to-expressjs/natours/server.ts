@@ -6,7 +6,7 @@ import { count } from "console";
 dotenv.config({ path: "./config.env" });
 
 const PORT = 3000;
-
+console.log("DB STRING:", process.env.DATABASE);
 mongoose
   .connect(process.env.DATABASE_LOCAL!, {
     useUnifiedTopology: true,
