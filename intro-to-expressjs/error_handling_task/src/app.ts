@@ -27,7 +27,7 @@ class ApiErrorClass extends Error {
 	}
 }
 
-const sendErrorDev = (res: Response, err: ApiErrorClass) => {
+const sendErrorDev = (res: Response, err: any) => {
 	res.status(err.statusCode).json({
 		status: err.status,
 		message: err.message,
@@ -35,7 +35,7 @@ const sendErrorDev = (res: Response, err: ApiErrorClass) => {
 		error: err,
 	});
 };
-const sendErrorProd = (res: Response, err: ApiErrorClass) => {
+const sendErrorProd = (res: Response, err: any) => {
 	if (err.isOperational) {
 		res.status(err.statusCode).json({
 			status: err.status,
@@ -51,7 +51,7 @@ const sendErrorProd = (res: Response, err: ApiErrorClass) => {
 };
 
 const errorHandler = (
-	err: ApiErrorClass,
+	err: any,
 	req: Request,
 	res: Response,
 	next: NextFunction,
@@ -61,16 +61,18 @@ const errorHandler = (
 
 	if (process.env.NODE_ENV === "development") {
 		sendErrorDev(res, err);
-	}
-	if (process.env.NODE_ENV === "production") {
+	} else if (process.env.NODE_ENV === "production") {
 		sendErrorProd(res, err);
+	} else {
+		res.status(500).json({
+			status: "error",
+			message: "Something went wrong",
+		});
 	}
-
-	next();
 };
 
 app.post("/api/wallet/transfer", (req: Request, res: Response, next) => {
-	const { senderId, receiverId, amount } = { ...req.body };
+	const { senderId, receiverId, amount } = req.body;
 
 	if (!(senderId && receiverId && amount)) {
 		return next(new ApiErrorClass(400, "Request contains missing fields"));
@@ -84,38 +86,34 @@ app.post("/api/wallet/transfer", (req: Request, res: Response, next) => {
 		);
 	}
 
-	if (!users.senderId) {
-		console.log(users.senderId);
-
+	if (!users[senderId]) {
 		return next(new ApiErrorClass(404, "Sender account does not exist"));
 	}
 
-	if (!users.receiverId) {
+	if (!users[receiverId]) {
 		return next(new ApiErrorClass(404, "Receiver account does not exist"));
 	}
 
-	if (users.senderId.balance < transferAmount) {
+	if (users[senderId].balance < transferAmount) {
 		return next(
 			new ApiErrorClass(
 				400,
-				`Sorry ${users.senderId.name}, you have insufficient balance`,
+				`Sorry ${users[senderId].name}, you have insufficient balance`,
 			),
 		);
 	}
-	users.senderId.balance -= transferAmount;
-	users.receiverId.balance += transferAmount;
+	users[senderId].balance -= transferAmount;
+	users[receiverId].balance += transferAmount;
 
 	res.status(200).json({
 		status: "success",
 		message: "Transfer was successful",
 		Amount: transferAmount,
 	});
-
-	next();
 });
 
 app.use((req, res, next) => {
-	next(new ApiErrorClass(400, `The path ${req.originalUrl} does not exist`));
+	next(new ApiErrorClass(404, `The path ${req.originalUrl} does not exist`));
 });
 
 app.use(errorHandler);
