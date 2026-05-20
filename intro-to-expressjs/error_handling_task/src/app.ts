@@ -1,6 +1,9 @@
 import express, { Request, Response, NextFunction } from "express";
+import "dotenv/config";
 
 const app = express();
+
+app.use(express.json());
 
 const users: Record<string, { name: string; balance: number }> = {
 	user1: { name: "Tolu", balance: 5000 },
@@ -66,18 +69,53 @@ const errorHandler = (
 	next();
 };
 
-app.use(express.json());
-
-app.post("api/wallet/transfer", (req: Request, res: Response) => {
+app.post("/api/wallet/transfer", (req: Request, res: Response, next) => {
 	const { senderId, receiverId, amount } = { ...req.body };
 
 	if (!(senderId && receiverId && amount)) {
-		return new ApiErrorClass(400, "Request contains missing fields");
+		return next(new ApiErrorClass(400, "Request contains missing fields"));
+	}
+
+	const transferAmount = parseFloat(amount);
+
+	if (!transferAmount || transferAmount <= 0) {
+		return next(
+			new ApiErrorClass(400, "Transfer amount must be a positive number"),
+		);
 	}
 
 	if (!users.senderId) {
-		return new ApiErrorClass(404, "Sender account does not exist");
+		console.log(users.senderId);
+
+		return next(new ApiErrorClass(404, "Sender account does not exist"));
 	}
+
+	if (!users.receiverId) {
+		return next(new ApiErrorClass(404, "Receiver account does not exist"));
+	}
+
+	if (users.senderId.balance < transferAmount) {
+		return next(
+			new ApiErrorClass(
+				400,
+				`Sorry ${users.senderId.name}, you have insufficient balance`,
+			),
+		);
+	}
+	users.senderId.balance -= transferAmount;
+	users.receiverId.balance += transferAmount;
+
+	res.status(200).json({
+		status: "success",
+		message: "Transfer was successful",
+		Amount: transferAmount,
+	});
+
+	next();
+});
+
+app.use((req, res, next) => {
+	next(new ApiErrorClass(400, `The path ${req.originalUrl} does not exist`));
 });
 
 app.use(errorHandler);
