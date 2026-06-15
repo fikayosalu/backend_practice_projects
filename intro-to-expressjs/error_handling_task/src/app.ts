@@ -1,54 +1,22 @@
 import express, { Request, Response, NextFunction } from "express";
+import { findUser, updateBalance } from "./database";
+import { ApiErrorClass } from "./utils/helperClasses";
+import { catchAsync, sendErrorDev, sendErrorProd } from "./utils/helpers";
+import { handleUserNotFoundErr } from "./utils/helpers";
 import "dotenv/config";
 
 const app = express();
 
 app.use(express.json());
 
-const users: Record<string, { name: string; balance: number }> = {
-	user1: { name: "Tolu", balance: 5000 },
-	user2: { name: "Ade", balance: 5000 },
-	user3: { name: "Sayo", balance: 5000 },
-	user4: { name: "Bolu", balance: 5000 },
-	user5: { name: "Lawal", balance: 5000 },
-	user6: { name: "David", balance: 5000 },
-};
-
-class ApiErrorClass extends Error {
-	status: string;
-	statusCode: number;
-	isOperational: boolean;
-
-	constructor(statusCode: number, message: string) {
-		super(message);
-		this.status = `${statusCode}`.startsWith("5") ? "error" : "failed";
-		this.statusCode = statusCode;
-		this.isOperational = true;
-	}
-}
-
-const sendErrorDev = (res: Response, err: any) => {
-	res.status(err.statusCode).json({
-		status: err.status,
-		message: err.message,
-		stack: err.stack,
-		error: err,
-	});
-};
-const sendErrorProd = (res: Response, err: any) => {
-	if (err.isOperational) {
-		res.status(err.statusCode).json({
-			status: err.status,
-			message: err.message,
-		});
-	} else {
-		console.error(err);
-		res.status(500).json({
-			status: "error",
-			message: "Something went wrong",
-		});
-	}
-};
+// const users: Record<string, { name: string; balance: number }> = {
+// 	user1: { name: "Tolu", balance: 5000 },
+// 	user2: { name: "Ade", balance: 5000 },
+// 	user3: { name: "Sayo", balance: 5000 },
+// 	user4: { name: "Bolu", balance: 5000 },
+// 	user5: { name: "Lawal", balance: 5000 },
+// 	user6: { name: "David", balance: 5000 },
+// };
 
 const errorHandler = (
 	err: any,
@@ -62,7 +30,15 @@ const errorHandler = (
 	if (process.env.NODE_ENV === "development") {
 		sendErrorDev(res, err);
 	} else if (process.env.NODE_ENV === "production") {
-		sendErrorProd(res, err);
+		let error = {
+			...err,
+			name: err.name,
+			message: err.message,
+			stack: err.stack,
+		};
+
+		if (err.message === "User not found") error = handleUserNotFoundErr();
+		sendErrorProd(res, error);
 	} else {
 		res.status(500).json({
 			status: "error",
@@ -71,46 +47,42 @@ const errorHandler = (
 	}
 };
 
-app.post("/api/wallet/transfer", (req: Request, res: Response, next) => {
-	const { senderId, receiverId, amount } = req.body;
+app.post(
+	"/api/wallet/transfer",
+	catchAsync(async (req: Request, res: Response) => {
+		const { senderId, receiverId, amount } = req.body;
 
-	if (!(senderId && receiverId && amount)) {
-		return next(new ApiErrorClass(400, "Request contains missing fields"));
-	}
+		if (!(senderId && receiverId && amount)) {
+			throw new ApiErrorClass(400, "Request contains missing fields");
+		}
 
-	const transferAmount = parseFloat(amount);
+		const transferAmount = parseFloat(amount);
 
-	if (!transferAmount || transferAmount <= 0) {
-		return next(
-			new ApiErrorClass(400, "Transfer amount must be a positive number"),
-		);
-	}
+		if (!transferAmount || transferAmount <= 0) {
+			throw new ApiErrorClass(400, "Transfer amount must be a positive number");
+		}
 
-	if (!users[senderId]) {
-		return next(new ApiErrorClass(404, "Sender account does not exist"));
-	}
+		const sender = await findUser(senderId);
 
-	if (!users[receiverId]) {
-		return next(new ApiErrorClass(404, "Receiver account does not exist"));
-	}
+		const receiver = await findUser(receiverId);
 
-	if (users[senderId].balance < transferAmount) {
-		return next(
-			new ApiErrorClass(
+		if (sender.balance < transferAmount) {
+			throw new ApiErrorClass(
 				400,
-				`Sorry ${users[senderId].name}, you have insufficient balance`,
-			),
-		);
-	}
-	users[senderId].balance -= transferAmount;
-	users[receiverId].balance += transferAmount;
+				`Sorry ${sender.name}, you have insufficient balance`,
+			);
+		}
 
-	res.status(200).json({
-		status: "success",
-		message: "Transfer was successful",
-		Amount: transferAmount,
-	});
-});
+		await updateBalance(senderId, sender.balance - transferAmount);
+		await updateBalance(receiverId, receiver.balance + transferAmount);
+
+		res.status(200).json({
+			status: "success",
+			message: "Transfer was successful",
+			Amount: transferAmount,
+		});
+	}),
+);
 
 app.use((req, res, next) => {
 	next(new ApiErrorClass(404, `The path ${req.originalUrl} does not exist`));
