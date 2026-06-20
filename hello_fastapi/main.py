@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -11,3 +13,8 @@ def home():
 @app.get("/greet/{name}")
 def greet(name: str):
     return {"status": "success", "message": f"Hi there {name}, welcome🙂"}
+
+
+@app.get("/time")
+def get_time():
+    return datetime.now()
