@@ -1,9 +1,21 @@
 import random
 from datetime import datetime
+from pydantic import Field, BaseModel
 
 from fastapi import FastAPI
 
 app = FastAPI()
+
+
+class ContactMessage(BaseModel):
+    """This class creates a model for the
+    request body and is validated by fastapi"""
+
+    name: str
+    email: str
+    message: str = Field(min_length=10)
+    subject: str = "General Inquiry"
+
 
 quotes = [
     "One day hungry man go chop",
