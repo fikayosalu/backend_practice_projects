@@ -26,21 +26,29 @@ quotes = [
 
 @app.get("/")
 def home():
+    """This function is for the root url.
+    It returns a greeting message on success"""
     return {"status": "success", "message": "Welcome to FastApi"}
 
 
 @app.get("/greet/{name}")
 def greet(name: str):
+    """This function return a personalized greeting message
+    based on the path parameter provided"""
     return {"status": "success", "message": f"Hi there {name}, welcome🙂"}
 
 
 @app.get("/time")
 def get_time():
+    """Returns the current sever time"""
     return datetime.now()
 
 
 @app.get("/quote")
 def get_quote(index: int = None):
+    """Accepts an integer query parameter and returns the a quote from
+    the quotes array using the parameter as an index.
+    If no parameter is provided it returns a random quote"""
     quote = random.choice(quotes)
     if index is None or index > 2:
         return {"status": "success", "message": quote}
