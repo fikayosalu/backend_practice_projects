@@ -1,8 +1,8 @@
 import random
 from datetime import datetime
-from pydantic import Field, BaseModel
 
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
 
 app = FastAPI()
 
@@ -45,3 +45,9 @@ def get_quote(index: int = None):
     if index is None or index > 2:
         return {"status": "success", "message": quote}
     return {"status": "success", "message": quotes[index]}
+
+
+@app.post("/contact")
+def contact(contact_message: ContactMessage):
+    """Accepts a request body and returns the message info"""
+    return {"status": "success", "info": f"{contact_message.message}"}
